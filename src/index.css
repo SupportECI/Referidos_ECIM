@@ -194,11 +194,24 @@ select {
   background: transparent;
   border: 1.5px solid var(--navy-800);
   color: var(--navy-800);
+  margin-bottom: 16px;
 }
 
 .btn-outline:hover {
   background: var(--navy-800);
   color: var(--white);
+}
+
+.btn-outline-2 {
+  background:  var(--gold-500);
+  border: 1.5px solid var(--gold-800);
+  color: var(--navy-900);
+  margin-bottom: 16px;
+}
+
+.btn-outline-2:hover {
+  background: var(--gold-400);
+  box-shadow: 0 6px 18px rgba(201, 162, 39, 0.35);
 }
 
 .btn-ghost {
@@ -894,4 +907,100 @@ tbody tr:hover {
 .toast .tick {
   color: var(--gold-400);
   font-weight: 700;
+}
+
+/* Contenedor del selector de estatus */
+.status-select-wrap {
+  display: inline-block;
+  position: relative;
+}
+
+/* Base del Selector Interactivo */
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 6px 28px 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  /* Flecha personalizada elegante mediante SVG */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%204b5563' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 12px;
+}
+
+.status-select:hover {
+  filter: brightness(0.96);
+  transform: translateY(-1px);
+}
+
+.status-select:focus {
+  box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.08);
+}
+
+/* PENDIENTE - Ámbar / Dorado */
+.status-select.pendiente {
+  background-color: #fef3c7;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+/* CONTACTADO - Azul Cyan */
+.status-select.contactado {
+  background-color: #e0f2fe;
+  color: #0369a1;
+  border-color: #bae6fd;
+}
+
+/* INSCRITO - Esmeralda / Verde */
+.status-select.inscrito {
+  background-color: #d1fae5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+
+/* NO INSCRITO - Rosa / Rojo */
+.status-select.no-inscrito {
+  background-color: #ffe4e6;
+  color: #be123c;
+  border-color: #fecdd3;
+}
+
+.status-select option {
+  background-color: #ffffff;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.status-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.status-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  padding: 6px 30px 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.status-select-icon {
+  position: absolute;
+  right: 10px;
+  pointer-events: none;
+  opacity: 0.75;
 }

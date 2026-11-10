@@ -23,7 +23,7 @@ export default function Modal({ isOpen, onClose }) {
           <X size={16} />
         </button>
         <span className="modal-eyebrow">Así ganas</span>
-        <div className="modal-amount">$1,000 <span>MXN</span></div>
+        <div className="modal-amount">$200 <span>MXN</span></div>
         <p className="modal-sub">Por cada persona que refieras y se inscriba en Eurocentro de Idiomas.</p>
         <div className="modal-legend">
           Válido para Inglés, Francés e Italiano, en cualquier modalidad. El bono se abona al confirmarse la inscripción.

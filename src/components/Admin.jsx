@@ -1,27 +1,38 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, Inbox, X } from 'lucide-react';
+import { Search, Users, X } from 'lucide-react';
 import Header from './Header';
 
-export default function Admin({ referrals, onUpdateStatus }) {
+export default function Admin({ user, onEliminarEmbajador }) {
+  const [embajadores, setEmbajadores] = useState([])
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedReferralId, setSelectedReferralId] = useState(null);
   const navigate = useNavigate();
 
-  const filteredReferrals = referrals.filter((ref) => {
-    const q = searchQuery.toLowerCase();
-    const fullName = ref.nombre ? ref.nombre.toLowerCase() : '';
-    const wpp = ref.wpp ? ref.wpp.toLowerCase() : '';
-    return fullName.includes(q) || wpp.includes(q);
-  });
+  useEffect(() => {
+    fetch('http://localhost:8080/api/usuarios/obtener')
+      .then(res => res.json())
+      .then(data => {
+        setEmbajadores(data);
+      })
+      .catch(error => console.error('Error al obtener embajadores:', error));
+  }, []);
 
-  const selectedReferral = referrals.find((ref) => ref.id === selectedReferralId);
+  const filteredEmbajadores = embajadores.filter((emb) => {
+    const q = searchQuery.toLowerCase();
+    const fullName = `${emb.nombre} ${emb.apellidos}`.toLowerCase();
+    const email = emb.correo ? emb.correo.toLowerCase() : '';
+    const celular = emb.celular ? emb.celular.toLowerCase() : '';
+    const relacion = emb.relacionEmpresa ? emb.relacionEmpresa.toLowerCase() : '';
+    const estado = emb.estado ? emb.estado.toLowerCase() : '';
+
+    return fullName.includes(q) || email.includes(q) || celular.includes(q) || relacion.includes(q) || estado.includes(q);
+  });
 
   const relacionMap = {
     alumno: 'Alumno actual',
     exalumno: 'Ex-alumno',
     papa: 'Papá o mamá de alumno',
-    publico: 'Público en general'
+    publico_general: 'Público en general'
   };
 
   return (
@@ -29,22 +40,22 @@ export default function Admin({ referrals, onUpdateStatus }) {
       <Header showBackToHome={true} />
 
       <div className="dash-wrap">
-        <p className="dash-greet">Panel de Control</p>
-        <h2 className="dash-title">Administración de Referidos</h2>
+        <p className="dash-greet">Panel de Control: {user.rol}</p>
+        <h2 className="dash-title">Gestión de Embajadores</h2>
 
         <div className="dash-actions">
           <button className="btn btn-outline" onClick={() => navigate('/')}>
-            ← Volver al inicio
+            ← Salir
           </button>
         </div>
 
         <div className="hist-head">
-          <h3>Todos los referidos registrados</h3>
+          <h3>Embajadores Activos</h3>
           <div className="search-box">
             <Search size={18} style={{ color: 'var(--muted)', flexShrink: 0 }} />
-            <input 
-              type="text" 
-              placeholder="Buscar por nombre o teléfono"
+            <input
+              type="text"
+              placeholder="Buscar por nombre o correo..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -53,33 +64,52 @@ export default function Admin({ referrals, onUpdateStatus }) {
 
         <div className="table-wrap">
           <div className="table-scroll">
-            <table style={{ cursor: 'pointer' }}>
+            <table>
               <thead>
                 <tr>
                   <th>#</th>
-                  <th>Nombre del referido</th>
+                  <th>Nombre Completo</th>
+                  <th>Correo</th>
                   <th>WhatsApp</th>
+                  <th>Relación</th>
                   <th>Estado</th>
-                  <th>Modalidad</th>
-                  <th>Idioma</th>
-                  <th>Fecha de registro</th>
-                  <th>Estatus (Clic para detalles)</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
-              <tbody>
-                {filteredReferrals.map((ref, idx) => (
-                  <tr key={ref.id || idx} onClick={() => setSelectedReferralId(ref.id)}>
-                    <td>{filteredReferrals.length - idx}</td>
-                    <td>{ref.nombre}</td>
-                    <td>{ref.wpp}</td>
-                    <td>{ref.estado}</td>
-                    <td>{ref.modalidad}</td>
-                    <td>{ref.idioma}</td>
-                    <td>{ref.fecha}</td>
+              <tbody id="hist-body">
+                {filteredEmbajadores.map((emb, idx) => (
+                  <tr key={emb.id || idx}>
+                    <td>{filteredEmbajadores.length - idx}</td>
+                    <td>{emb.nombre} {emb.apellidos}</td>
+                    <td>{emb.correo}</td>
+                    <td>{emb.celular}</td>
+                    <td>{relacionMap[emb.relacionEmpresa] || emb.relacionEmpresa}</td>
+                    <td>{emb.estado}</td>
                     <td>
-                      <span className={`status-badge ${ref.estatus.toLowerCase()}`}>
-                        {ref.estatus.charAt(0).toUpperCase() + ref.estatus.slice(1)}
-                      </span>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          className="btn btn-navy"
+                          style={{ padding: '4px 10px', fontSize: '12px' }}
+                          onClick={() => navigate(`/admin/referidos/${emb.id}`, { state: { embajador: emb } })}
+                        >
+                          Ver Referidos
+                        </button>
+
+                        {/* Este botón solo lo ve el ADMIN */}
+                        {user.rol === 'ADMIN' && (
+                          <button
+                            className="btn"
+                            style={{ padding: '4px 10px', fontSize: '12px', backgroundColor: '#dc3545', color: 'white', border: 'none' }}
+                            onClick={() => {
+                              if (window.confirm('¿Seguro que deseas dar de baja a este embajador?')) {
+                                onEliminarEmbajador(emb.id);
+                              }
+                            }}
+                          >
+                            Dar de baja
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -87,97 +117,15 @@ export default function Admin({ referrals, onUpdateStatus }) {
             </table>
           </div>
 
-          <div className={`empty-state ${referrals.length === 0 ? 'show' : ''}`}>
+          <div className={`empty-state ${embajadores.length === 0 ? 'show' : ''}`}>
             <div className="glyph" style={{ display: 'flex', justifyContent: 'center', marginBottom: '10px' }}>
-              <Inbox size={36} style={{ color: 'var(--muted)' }} />
+              <Users size={36} style={{ color: 'var(--muted)' }} />
             </div>
-            <h4>No hay referidos registrados</h4>
-            <p>Los referidos recomendados por los usuarios aparecerán aquí.</p>
+            <h4>No hay embajadores registrados</h4>
+            <p>Los usuarios que se registren en la plataforma aparecerán aquí.</p>
           </div>
         </div>
       </div>
-
-      {selectedReferral && (
-        <div 
-          className="modal-overlay show" 
-          style={{ display: 'flex' }}
-          onClick={() => setSelectedReferralId(null)}
-        >
-          <div 
-            className="card" 
-            style={{ maxWidth: '500px', width: '100%', position: 'relative', borderTop: '4px solid var(--navy-800)' }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <button 
-              className="modal-close" 
-              onClick={() => setSelectedReferralId(null)}
-              style={{ color: 'var(--navy-800)', background: 'rgba(10,19,48,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-            >
-              <X size={18} />
-            </button>
-            <h3 style={{ fontSize: '20px', marginBottom: '16px' }}>Detalles de la Recomendación</h3>
-
-            <div style={{ marginBottom: '18px', textAlign: 'left' }}>
-              <h4 style={{ color: 'var(--gold-500)', fontSize: '15px', borderBottom: '1px solid var(--border)', paddingBottom: '4px', marginBottom: '8px' }}>
-                Datos del Referido
-              </h4>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Nombre:</strong> {selectedReferral.nombre}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>WhatsApp:</strong> {selectedReferral.wpp}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Correo:</strong> {selectedReferral.correo || 'No registrado'}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Estado:</strong> {selectedReferral.estado}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Modalidad:</strong> {selectedReferral.modalidad}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Idioma de interés:</strong> {selectedReferral.idioma}</p>
-              <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Fecha de registro:</strong> {selectedReferral.fecha}</p>
-            </div>
-
-            <div style={{ marginBottom: '22px', textAlign: 'left' }}>
-              <h4 style={{ color: 'var(--gold-500)', fontSize: '15px', borderBottom: '1px solid var(--border)', paddingBottom: '4px', marginBottom: '8px' }}>
-                Datos del Recomendador (Referente)
-              </h4>
-              {selectedReferral.referrer ? (
-                <>
-                  <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                    <strong>Nombre:</strong> {selectedReferral.referrer.nombre} {selectedReferral.referrer.apellido || ''}
-                  </p>
-                  <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>WhatsApp:</strong> {selectedReferral.referrer.wpp}</p>
-                  <p style={{ margin: '4px 0', fontSize: '14px' }}><strong>Correo:</strong> {selectedReferral.referrer.correo}</p>
-                  <p style={{ margin: '4px 0', fontSize: '14px' }}>
-                    <strong>Relación:</strong> {relacionMap[selectedReferral.referrer.relacion] || selectedReferral.referrer.relacion}
-                  </p>
-                </>
-              ) : (
-                <p style={{ margin: '4px 0', fontSize: '14px', color: 'var(--muted)', fontStyle: 'italic' }}>
-                  Sin detalles del recomendador (registro de prueba inicial).
-                </p>
-              )}
-            </div>
-
-            <div className="field" style={{ textAlign: 'left' }}>
-              <label htmlFor="admin-change-status" style={{ fontWeight: '600', fontSize: '13px', color: 'var(--navy-800)' }}>
-                Cambiar estatus de la recomendación:
-              </label>
-              <select
-                id="admin-change-status"
-                value={selectedReferral.estatus}
-                onChange={(e) => onUpdateStatus(selectedReferral.id, e.target.value)}
-                style={{ width: '100%', marginTop: '6px' }}
-              >
-                <option value="pendiente">Pendiente</option>
-                <option value="contactado">Contactado</option>
-                <option value="inscrito">Inscrito</option>
-              </select>
-            </div>
-
-            <button 
-              className="btn btn-navy btn-block" 
-              style={{ marginTop: '20px' }}
-              onClick={() => setSelectedReferralId(null)}
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }

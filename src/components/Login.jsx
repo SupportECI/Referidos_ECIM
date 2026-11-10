@@ -7,15 +7,42 @@ export default function Login({ onLogin }) {
   const [pass, setPass] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!e.currentTarget.checkValidity()) {
       e.currentTarget.reportValidity();
+
       return;
     }
 
-    onLogin({ correo, pass });
+    const datosLogin = {
+      correo: correo,
+      password: pass,
+    }
+
+    try {
+      const respuesta = await fetch('http://localhost:8080/api/usuarios/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosLogin)
+      });
+
+      if (respuesta.status === 200) {
+        const usuario = await respuesta.json();
+        
+        localStorage.setItem('embajadorId', usuario.id);
+
+        onLogin(usuario);
+      } else if (respuesta.status === 401) {
+        const messageError = await respuesta.text();
+        alert(messageError);
+      }
+    } catch (error){
+      console.error('Error al conectar con el backend:', error);
+    }
   };
 
   return (
@@ -33,11 +60,11 @@ export default function Login({ onLogin }) {
 
           <div className="field">
             <label htmlFor="login-correo">Correo electrónico*</label>
-            <input 
-              id="login-correo" 
-              type="email" 
-              placeholder="demo@correo.com" 
-              required 
+            <input
+              id="login-correo"
+              type="email"
+              placeholder="demo@correo.com"
+              required
               value={correo}
               onChange={(e) => setCorreo(e.target.value)}
             />
@@ -45,11 +72,11 @@ export default function Login({ onLogin }) {
 
           <div className="field">
             <label htmlFor="login-pass">Contraseña*</label>
-            <input 
-              id="login-pass" 
-              type="password" 
-              placeholder="••••••••" 
-              required 
+            <input
+              id="login-pass"
+              type="password"
+              placeholder="••••••••"
+              required
               value={pass}
               onChange={(e) => setPass(e.target.value)}
             />
@@ -61,9 +88,9 @@ export default function Login({ onLogin }) {
 
           <div className="home-footer-link" style={{ paddingBottom: '0', marginTop: '20px' }}>
             ¿No tienes cuenta?{' '}
-            <button 
-              type="button" 
-              onClick={() => navigate('/register')} 
+            <button
+              type="button"
+              onClick={() => navigate('/register')}
               style={{ fontWeight: 600, color: 'var(--navy-800)', textDecoration: 'underline', background: 'none', border: 'none', padding: 0, cursor: 'pointer' }}
             >
               Regístrate aquí

@@ -13,7 +13,7 @@ export default function Header({ user, showBackToHome, showAddReferral, showUser
 
   const getFullName = () => {
     if (!user) return 'Andrés García';
-    return `${user.nombre} ${user.apellido || ''}`.trim();
+    return `${user.nombre} ${user.apellidos || ''}`.trim();
   };
 
   return (
@@ -36,11 +36,6 @@ export default function Header({ user, showBackToHome, showAddReferral, showUser
 
       {(showAddReferral || showUserChip) && (
         <div className="header-actions">
-          {showAddReferral && (
-            <button className="btn btn-gold" onClick={() => navigate('/referral')}>
-              + Agregar Referido
-            </button>
-          )}
           {showUserChip && (
             <div className="user-chip">
               <div className="avatar">{getInitials()}</div>

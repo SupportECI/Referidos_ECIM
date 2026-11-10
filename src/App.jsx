@@ -9,65 +9,21 @@ import Admin from './components/Admin';
 import Modal from './components/Modal';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import Toast from './components/Toast';
+import ReferidosEmbajador from './components/ReferidosEmbajador';
 
 export default function App() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // Initial referrals based on the original HTML mock rows
+  // Referidos de prueba
   const [referrals, setReferrals] = useState([
-    {
-      id: 3,
-      nombre: 'Ana Torres',
-      wpp: '993 456 7890',
-      estado: 'Tabasco',
-      modalidad: 'Online',
-      idioma: 'Italiano',
-      fecha: '12/07/2026',
-      estatus: 'pendiente',
-      referrer: {
-        nombre: 'Andrés',
-        apellido: 'García',
-        correo: 'andres@correo.com',
-        wpp: '961 123 4567',
-        relacion: 'papa'
-      }
-    },
-    {
-      id: 2,
-      nombre: 'Carlos Ramírez',
-      wpp: '55 9876 5432',
-      estado: 'Ciudad de México',
-      modalidad: 'Online',
-      idioma: 'Francés',
-      fecha: '08/07/2026',
-      estatus: 'contactado',
-      referrer: {
-        nombre: 'Andrés',
-        apellido: 'García',
-        correo: 'andres@correo.com',
-        wpp: '961 123 4567',
-        relacion: 'papa'
-      }
-    },
-    {
-      id: 1,
-      nombre: 'María López',
-      wpp: '961 123 4567',
-      estado: 'Chiapas',
-      modalidad: 'Presencial',
-      idioma: 'Inglés',
-      fecha: '02/07/2026',
-      estatus: 'inscrito',
-      referrer: {
-        nombre: 'Andrés',
-        apellido: 'García',
-        correo: 'andres@correo.com',
-        wpp: '961 123 4567',
-        relacion: 'papa'
-      }
-    }
+    { id: 3, nombre: 'Ana Torres', wpp: '993 456 7890', estado: 'Tabasco', modalidad: 'Online', idioma: 'Italiano', fecha: '12/07/2026', estatus: 'pendiente', referrer: { nombre: 'Andrés', apellido: 'García', correo: 'andres@correo.com', wpp: '961 123 4567', relacion: 'papa' } },
+    { id: 2, nombre: 'Carlos Ramírez', wpp: '55 9876 5432', estado: 'Ciudad de México', modalidad: 'Online', idioma: 'Francés', fecha: '08/07/2026', estatus: 'contactado', referrer: { nombre: 'Andrés', apellido: 'García', correo: 'andres@correo.com', wpp: '961 123 4567', relacion: 'papa' } },
+    { id: 1, nombre: 'María López', wpp: '961 123 4567', estado: 'Chiapas', modalidad: 'Presencial', idioma: 'Inglés', fecha: '02/07/2026', estatus: 'inscrito', referrer: { nombre: 'Andrés', apellido: 'García', correo: 'andres@correo.com', wpp: '961 123 4567', relacion: 'papa' } }
   ]);
+
+  // Embajadores de prueba
+  const [embajadores, setEmbajadores] = useState([]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '' });
@@ -79,16 +35,15 @@ export default function App() {
     }, 2600);
   };
 
-  const handleLogin = (credentials) => {
-    setUser({
-      nombre: 'Andrés',
-      apellido: 'García',
-      correo: credentials.correo,
-      wpp: '961 123 4567',
-      relacion: 'papa'
-    });
-    navigate('/dashboard');
-    triggerToast('¡Bienvenido de nuevo, Embajador!');
+  const handleLogin = (usuarioAutenticado) => {
+    setUser(usuarioAutenticado);
+
+    // Evaluamos en MAYÚSCULAS para coincidir con la base de datos
+    if (usuarioAutenticado.rol === 'admin' || usuarioAutenticado.rol === 'supervisor') {
+      navigate('/admin');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const handleRegister = (userData) => {
@@ -104,7 +59,7 @@ export default function App() {
   };
 
   const handleUpdateReferralStatus = (id, newStatus) => {
-    setReferrals((prev) => 
+    setReferrals((prev) =>
       prev.map((ref) => (ref.id === id ? { ...ref, estatus: newStatus } : ref))
     );
     triggerToast('Estatus actualizado correctamente.');
@@ -116,54 +71,63 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login onLogin={handleLogin} />} />
         <Route path="/register" element={<Register onRegister={handleRegister} />} />
-        
-        {/* Protected Dashboard Route */}
-        <Route 
-          path="/dashboard" 
+
+        <Route
+          path="/dashboard"
           element={
-            user ? (
-              <Dashboard 
-                user={user} 
-                referrals={referrals} 
+            user && user.rol === 'embajador' ? (
+              <Dashboard
+                user={user}
+                referrals={referrals}
                 onOpenModal={() => setIsModalOpen(true)}
               />
             ) : (
               <Navigate to="/login" replace />
             )
-          } 
+          }
         />
-        
-        {/* Protected Referral Route */}
-        <Route 
-          path="/referral" 
+
+        <Route
+          path="/admin"
           element={
-            user ? (
-              <Referral 
+            user && (user.rol === 'admin' || user.rol === 'supervisor') ? (
+              <Admin 
                 user={user} 
-                onAddReferral={handleAddReferral} 
+                embajadores={embajadores} 
+                onEliminarEmbajador={(id) => console.log('Eliminar embajador con ID:', id)} 
               />
             ) : (
               <Navigate to="/login" replace />
             )
-          } 
+          }
         />
 
-        {/* Admin Panel Route */}
-        <Route 
-          path="/admin" 
+        <Route
+          path="/referral"
           element={
-            <Admin 
-              referrals={referrals} 
-              onUpdateStatus={handleUpdateReferralStatus} 
-            />
-          } 
+            user ? (
+              <Referral
+                user={user}
+                onAddReferral={handleAddReferral}
+              />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
         />
 
-        {/* Fallback route redirecting to Home */}
-        <Route path="*" element={<Navigate to="/" replace />} />
+        {<Route 
+          path="/admin/referidos/:id"
+          element={
+            user && (user.rol === 'admin' || user.rol === 'supervisor') ? (
+              <ReferidosEmbajador />
+            ) : (
+              <Navigate to="/login" replace />
+            )
+          }
+        />}
       </Routes>
 
-      {/* Shared/Persistent Widgets */}
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <WhatsAppFloat />
       <Toast show={toast.show} message={toast.message} />

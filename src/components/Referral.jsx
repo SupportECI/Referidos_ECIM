@@ -14,7 +14,7 @@ export default function Referral({ user, onAddReferral }) {
   const [nombre, setNombre] = useState('');
   const [apellidoP, setApellidoP] = useState('');
   const [apellidoM, setApellidoM] = useState('');
-  const [wpp, setWpp] = useState('');
+  const [celular, setCelular] = useState('');
   const [correo, setCorreo] = useState('');
   const [estado, setEstado] = useState('');
   const [modalidad, setModalidad] = useState('');
@@ -46,32 +46,41 @@ export default function Referral({ user, onAddReferral }) {
                   String(today.getMonth() + 1).padStart(2, '0') + '/' + 
                   today.getFullYear();
 
-    const idiomaText = {
-      ingles: 'Inglés',
-      frances: 'Francés',
-      italiano: 'Italiano'
-    }[idioma] || idioma;
-
+    // 1. Armamos el paquete de datos exacto para Spring Boot
     const newRef = {
-      id: Date.now(),
-      nombre: `${nombre} ${apellidoP} ${apellidoM}`.trim(),
-      wpp: wpp.trim(),
+      nombre: nombre.trim(),
+      apaterno: apellidoP.trim(),
+      amaterno: apellidoM.trim(),
+      celular: celular.trim(),
       correo: correo.trim(),
-      estado,
-      modalidad,
-      idioma: idiomaText,
-      fecha,
-      estatus: 'pendiente',
-      referrer: user ? {
-        nombre: user.nombre,
-        apellido: user.apellido,
-        correo: user.correo,
-        wpp: user.wpp,
-        relacion: user.relacion
-      } : null
+      estado: estado,
+      modalidad: modalidad,
+      idioma: idioma,
+      embajador: { 
+        id: user.id 
+      }
     };
 
-    onAddReferral(newRef);
+    fetch('http://localhost:8080/api/referidos/referral', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newRef)
+    })
+      .then(async res => {
+        if (res.ok) {
+          alert('¡Referido registrado con éxito!');
+          navigate('/dashboard');
+        } else {
+          const messageError = await res.text();
+          alert('Hubo un error al registrar el referido. Revisa la consola.');
+          console.error('Error desde Spring boot', messageError);
+        }
+      })
+      .catch(error => {
+        console.error('Error de conexión:', error);
+      });
   };
 
   const modalidadDisabled = !estado;
@@ -134,14 +143,14 @@ export default function Referral({ user, onAddReferral }) {
 
           <div className="field-grid">
             <div className="field">
-              <label htmlFor="ref-wpp">Número de WhatsApp*</label>
+              <label htmlFor="ref-celular">Número de celular*</label>
               <input 
-                id="ref-wpp" 
+                id="ref-celular" 
                 type="tel" 
                 placeholder="961 123 4567" 
                 required 
-                value={wpp}
-                onChange={(e) => setWpp(e.target.value)}
+                value={celular}
+                onChange={(e) => setCelular(e.target.value)}
               />
             </div>
             <div className="field">
@@ -205,9 +214,9 @@ export default function Referral({ user, onAddReferral }) {
               onChange={(e) => setIdioma(e.target.value)}
             >
               <option value="" disabled>Selecciona una opción</option>
-              <option value="ingles">Inglés</option>
-              <option value="frances">Francés</option>
-              <option value="italiano">Italiano</option>
+              <option value="INGLES">Inglés</option>
+              <option value="FRANCES">Francés</option>
+              <option value="ITALIANO">Italiano</option>
             </select>
           </div>
 

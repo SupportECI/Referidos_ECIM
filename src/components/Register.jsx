@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import Header from './Header';
+import { useNavigate } from 'react-router-dom';
 
 const ESTADOS = [
   "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
@@ -29,6 +30,8 @@ export default function Register({ onRegister }) {
   const [strengthPct, setStrengthPct] = useState(0);
   const [strengthColor, setStrengthColor] = useState('#E4E0D2');
   const [strengthLabel, setStrengthLabel] = useState('—');
+
+  const navigate = useNavigate();
 
   const handlePassChange = (val) => {
     setPass(val);
@@ -72,7 +75,7 @@ export default function Register({ onRegister }) {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     const wppOk = wpp === wpp2;
@@ -87,14 +90,35 @@ export default function Register({ onRegister }) {
       return;
     }
 
-    onRegister({
-      nombre,
-      apellido,
-      estado,
-      correo,
-      wpp,
-      relacion,
-    });
+    const datosBackend = {
+      nombre: nombre,
+      apellidos: apellido,
+      estado: estado,
+      correo: correo,
+      celular: wpp,
+      relacionEmpresa: relacion,
+      password: pass
+    };
+
+    try {
+      const respuesta = await fetch('http://localhost:8080/api/usuarios/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(datosBackend)
+      });
+
+      if (respuesta.status === 201) {
+        const usuarioCreado = await respuesta.json();
+        navigate('/login');
+      } else if (respuesta.status === 409) {
+        const messageError = await respuesta.text();
+        alert(messageError);
+      }
+    } catch (error) {
+      console.error('Error al conectar con el backend:', error);
+    }
   };
 
   return (
@@ -107,28 +131,28 @@ export default function Register({ onRegister }) {
           <p className="sub">Regístrate una vez y empieza a recomendar Eurocentro cuando quieras.</p>
         </div>
 
-        <form className="card" id="form-register" noValidate onSubmit={handleSubmit}>
+        <form className="card" id="form-register" onSubmit={handleSubmit}>
           <h3>Tus datos</h3>
 
           <div className="field-grid">
             <div className="field">
               <label htmlFor="reg-nombre">Nombre*</label>
-              <input 
-                id="reg-nombre" 
-                type="text" 
-                placeholder="Ej. Andrés" 
-                required 
+              <input
+                id="reg-nombre"
+                type="text"
+                placeholder="Ej. Andrés"
+                required
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
               />
             </div>
             <div className="field">
               <label htmlFor="reg-apellido">Apellido*</label>
-              <input 
-                id="reg-apellido" 
-                type="text" 
-                placeholder="Ej. García" 
-                required 
+              <input
+                id="reg-apellido"
+                type="text"
+                placeholder="Ej. García"
+                required
                 value={apellido}
                 onChange={(e) => setApellido(e.target.value)}
               />
@@ -138,9 +162,9 @@ export default function Register({ onRegister }) {
           <div className="field-grid">
             <div className="field">
               <label htmlFor="reg-estado">Estado*</label>
-              <select 
-                id="reg-estado" 
-                required 
+              <select
+                id="reg-estado"
+                required
                 value={estado}
                 onChange={(e) => setEstado(e.target.value)}
               >
@@ -152,11 +176,11 @@ export default function Register({ onRegister }) {
             </div>
             <div className="field">
               <label htmlFor="reg-correo">Correo electrónico*</label>
-              <input 
-                id="reg-correo" 
-                type="email" 
-                placeholder="demo@correo.com" 
-                required 
+              <input
+                id="reg-correo"
+                type="email"
+                placeholder="demo@correo.com"
+                required
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
               />
@@ -166,22 +190,22 @@ export default function Register({ onRegister }) {
           <div className="field-grid">
             <div className="field">
               <label htmlFor="reg-wpp">WhatsApp*</label>
-              <input 
-                id="reg-wpp" 
-                type="tel" 
-                placeholder="961 123 4567" 
-                required 
+              <input
+                id="reg-wpp"
+                type="tel"
+                placeholder="961 123 4567"
+                required
                 value={wpp}
                 onChange={(e) => handleWppChange(e.target.value)}
               />
             </div>
             <div className={`field ${wppMismatch ? 'error' : ''}`} id="field-wpp-confirm">
               <label htmlFor="reg-wpp2">Confirmar WhatsApp*</label>
-              <input 
-                id="reg-wpp2" 
-                type="tel" 
-                placeholder="961 123 4567" 
-                required 
+              <input
+                id="reg-wpp2"
+                type="tel"
+                placeholder="961 123 4567"
+                required
                 value={wpp2}
                 onChange={(e) => handleWpp2Change(e.target.value)}
               />
@@ -191,20 +215,20 @@ export default function Register({ onRegister }) {
 
           <div className="field">
             <label htmlFor="reg-relacion">¿Cuál es tu relación con Eurocentro?*</label>
-            <select 
-              id="reg-relacion" 
-              required 
+            <select
+              id="reg-relacion"
+              required
               value={relacion}
               onChange={(e) => setRelacion(e.target.value)}
             >
               <option value="" disabled>Selecciona una opción</option>
               <option value="alumno">Alumno actual</option>
               <option value="exalumno">Ex-alumno</option>
-              <option value="papa">Papá o mamá de alumno</option>
-              <option value="publico">Público en general</option>
+              <option value="padre_alumno">Papá o mamá de alumno</option>
+              <option value="publico_general">Público en general</option>
             </select>
           </div>
-          
+
           <div className={`alumno-toggle-note ${relacion === 'alumno' ? 'show' : ''}`} id="alumno-note">
             Como alumno actual, puedes elegir que tu bono se aplique directo a tu colegiatura.
           </div>
@@ -212,29 +236,29 @@ export default function Register({ onRegister }) {
           <div className="field-grid">
             <div className="field">
               <label htmlFor="reg-pass">Contraseña*</label>
-              <input 
-                id="reg-pass" 
-                type="password" 
-                placeholder="••••••••" 
-                required 
+              <input
+                id="reg-pass"
+                type="password"
+                placeholder="••••••••"
+                required
                 value={pass}
                 onChange={(e) => handlePassChange(e.target.value)}
               />
             </div>
             <div className={`field ${passMismatch ? 'error' : ''}`} id="field-pass-confirm">
               <label htmlFor="reg-pass2">Confirmar contraseña*</label>
-              <input 
-                id="reg-pass2" 
-                type="password" 
-                placeholder="••••••••" 
-                required 
+              <input
+                id="reg-pass2"
+                type="password"
+                placeholder="••••••••"
+                required
                 value={pass2}
                 onChange={(e) => handlePass2Change(e.target.value)}
               />
               <span className="err">Las contraseñas no coinciden.</span>
             </div>
           </div>
-          
+
           <div className="strength-row">
             <div className="strength-bar">
               <span id="strength-fill" style={{ width: `${strengthPct}%`, background: strengthColor }}></span>
@@ -243,10 +267,10 @@ export default function Register({ onRegister }) {
           </div>
 
           <div className="checkbox-row">
-            <input 
-              type="checkbox" 
-              id="reg-terms" 
-              required 
+            <input
+              type="checkbox"
+              id="reg-terms"
+              required
               checked={terms}
               onChange={(e) => setTerms(e.target.checked)}
             />
