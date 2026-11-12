@@ -1,7 +1,10 @@
 package com.referidos.demo.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+
+import java.time.LocalDate;
 
 @Entity
 @Table (name = "referidos")
@@ -42,6 +45,15 @@ public class Referidos {
 
     @Column(nullable = false)
     private String estatus = "pendiente";
+
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    @Column(name = "fecha_registro")
+    private LocalDate fechaRegistro;
+
+    @PrePersist
+    public void asignarFecha() {
+        this.fechaRegistro = LocalDate.now();
+    }
 
     public Long getId() {
         return id;
@@ -129,5 +141,13 @@ public class Referidos {
 
     public void setEstatus(String estatus) {
         this.estatus = estatus;
+    }
+
+    public LocalDate getFecharegistro() {
+        return fechaRegistro;
+    }
+
+    public void setFecharegistro(LocalDate fecharegistro) {
+        this.fechaRegistro = fecharegistro;
     }
 }

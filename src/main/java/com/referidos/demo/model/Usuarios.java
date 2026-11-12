@@ -35,6 +35,12 @@ public class Usuarios {
     @Column(nullable = false)
     private RolUsuario rol;
 
+    @Column(nullable = false)
+    private boolean verificado = false;
+
+    @Column(name = "token_verificacion")
+    private String tokenVerificacion;
+
     public String getNombre() {
         return nombre;
     }
@@ -105,5 +111,21 @@ public class Usuarios {
 
     public void setRol(RolUsuario rol) {
         this.rol = rol;
+    }
+
+    public boolean isVerificado() {
+        return verificado;
+    }
+
+    public void setVerificado(boolean verificado) {
+        this.verificado = verificado;
+    }
+
+    public String getTokenVerificacion() {
+        return tokenVerificacion;
+    }
+
+    public void setTokenVerificacion(String tokenVerificacion) {
+        this.tokenVerificacion = tokenVerificacion;
     }
 }

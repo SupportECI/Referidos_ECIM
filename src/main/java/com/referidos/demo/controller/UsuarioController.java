@@ -33,6 +33,7 @@ public class UsuarioController {
         try {
             Usuarios usuarioLogueado = usuarioService.login(usuarios);
             return new ResponseEntity<>(usuarioLogueado, HttpStatus.OK);
+
         } catch (RuntimeException e){
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
@@ -45,6 +46,16 @@ public class UsuarioController {
             return new ResponseEntity<>(lista, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>((HttpHeaders) null, HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/verificar")
+    public ResponseEntity<?> verificarCuenta(@RequestParam String token){
+        try {
+            String mensaje = usuarioService.verificarCuenta(token);
+            return new ResponseEntity<>(mensaje, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }
