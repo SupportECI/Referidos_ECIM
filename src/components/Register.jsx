@@ -62,17 +62,24 @@ export default function Register({ onRegister }) {
   };
 
   const handleWppChange = (val) => {
-    setWpp(val);
-    if (wppMismatch && val === wpp2) {
+    const soloNumeros = val.replace(/\D/g, '');
+    setWpp(soloNumeros);
+    if (wppMismatch && soloNumeros === wpp2) {
       setWppMismatch(false);
     }
   };
 
   const handleWpp2Change = (val) => {
-    setWpp2(val);
-    if (wppMismatch && wpp === val) {
+    const soloNumeros = val.replace(/\D/g, '');
+    setWpp2(soloNumeros);
+    if (wppMismatch && wpp === soloNumeros) {
       setWppMismatch(false);
     }
+  };
+
+  const sanitizarTexto = (texto) => {
+    if (!texto) return '';
+    return texto.trim().replace(/<[^>]*>?/gm, '');
   };
 
   const handleSubmit = async (e) => {
@@ -91,13 +98,13 @@ export default function Register({ onRegister }) {
     }
 
     const datosBackend = {
-      nombre: nombre,
-      apellidos: apellido,
+      nombre: sanitizarTexto(nombre),
+      apellidos: sanitizarTexto(apellido),
       estado: estado,
-      correo: correo,
+      correo: sanitizarTexto(correo).toLowerCase(),
       celular: wpp,
       relacionEmpresa: relacion,
-      password: pass
+      password: pass 
     };
 
     try {
@@ -110,7 +117,7 @@ export default function Register({ onRegister }) {
       });
 
       if (respuesta.status === 201) {
-        const usuarioCreado = await respuesta.json();
+        await respuesta.json();
         navigate('/check-email');
       } else if (respuesta.status === 409) {
         const messageError = await respuesta.text();
@@ -142,6 +149,10 @@ export default function Register({ onRegister }) {
                 type="text"
                 placeholder="Ej. Andrés"
                 required
+                minLength="2"
+                maxLength="50"
+                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                title="El nombre solo puede contener letras"
                 value={nombre}
                 onChange={(e) => setNombre(e.target.value)}
               />
@@ -153,6 +164,10 @@ export default function Register({ onRegister }) {
                 type="text"
                 placeholder="Ej. García"
                 required
+                minLength="2"
+                maxLength="50"
+                pattern="^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$"
+                title="Los apellidos solo pueden contener letras"
                 value={apellido}
                 onChange={(e) => setApellido(e.target.value)}
               />
@@ -181,6 +196,7 @@ export default function Register({ onRegister }) {
                 type="email"
                 placeholder="demo@correo.com"
                 required
+                maxLength="100"
                 value={correo}
                 onChange={(e) => setCorreo(e.target.value)}
               />
@@ -195,6 +211,10 @@ export default function Register({ onRegister }) {
                 type="tel"
                 placeholder="961 123 4567"
                 required
+                minLength="10"
+                maxLength="10"
+                pattern="^\d{10}$"
+                title="Debe contener exactamente 10 números"
                 value={wpp}
                 onChange={(e) => handleWppChange(e.target.value)}
               />
@@ -206,6 +226,10 @@ export default function Register({ onRegister }) {
                 type="tel"
                 placeholder="961 123 4567"
                 required
+                minLength="10"
+                maxLength="10"
+                pattern="^\d{10}$"
+                title="Debe contener exactamente 10 números"
                 value={wpp2}
                 onChange={(e) => handleWpp2Change(e.target.value)}
               />
@@ -241,6 +265,7 @@ export default function Register({ onRegister }) {
                 type="password"
                 placeholder="••••••••"
                 required
+                minLength="8"
                 value={pass}
                 onChange={(e) => handlePassChange(e.target.value)}
               />
@@ -252,6 +277,7 @@ export default function Register({ onRegister }) {
                 type="password"
                 placeholder="••••••••"
                 required
+                minLength="8"
                 value={pass2}
                 onChange={(e) => handlePass2Change(e.target.value)}
               />

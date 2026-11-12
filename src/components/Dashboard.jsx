@@ -60,7 +60,7 @@ export default function Dashboard({ user, onOpenModal }) {
 
       <div className="dash-wrap">
         <p className="dash-greet">Hola de nuevo,</p>
-        <h2 className="dash-title" id="dash-greet-name">Hola, {user.nombre || 'Embajador'}</h2>
+        <h2 className="dash-title" id="dash-greet-name">{user.nombre || 'Embajador'}</h2>
 
         <div className="dash-actions">
           <button className="btn btn-outline-2" onClick={() => navigate('/referral')}>

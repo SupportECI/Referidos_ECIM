@@ -40,7 +40,6 @@ export default function App() {
   const handleLogin = (usuarioAutenticado) => {
     setUser(usuarioAutenticado);
 
-    // Evaluamos en MAYÚSCULAS para coincidir con la base de datos
     if (usuarioAutenticado.rol === 'admin' || usuarioAutenticado.rol === 'supervisor') {
       navigate('/admin');
     } else {
@@ -122,7 +121,7 @@ export default function App() {
           path="/admin/referidos/:id"
           element={
             user && (user.rol === 'admin' || user.rol === 'supervisor') ? (
-              <ReferidosEmbajador />
+              <ReferidosEmbajador  user={user} />
             ) : (
               <Navigate to="/login" replace />
             )
