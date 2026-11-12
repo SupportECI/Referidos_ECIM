@@ -111,7 +111,7 @@ export default function Register({ onRegister }) {
 
       if (respuesta.status === 201) {
         const usuarioCreado = await respuesta.json();
-        navigate('/login');
+        navigate('/check-email');
       } else if (respuesta.status === 409) {
         const messageError = await respuesta.text();
         alert(messageError);

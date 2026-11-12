@@ -37,8 +37,9 @@ export default function Dashboard({ user, onOpenModal }) {
     const estado = ref.estado ? ref.estado.toLowerCase() : '';
     const modalidad = ref.modalidad ? ref.modalidad.toLowerCase() : '';
     const idioma = ref.idioma ? ref.idioma.toLowerCase() : '';
+    const fechaRegistro = ref.fechaRegistro ? ref.fechaRegistro.toLowerCase() : '';
 
-    return fullName.includes(q) || celular.includes(q) || correo.includes(q) || estado.includes(q) || modalidad.includes(q) || idioma.includes(q);
+    return fullName.includes(q) || celular.includes(q) || correo.includes(q) || estado.includes(q) || modalidad.includes(q) || idioma.includes(q) || fechaRegistro.includes(q);
   });
 
   // Mapeador de etiquetas legibles
@@ -120,7 +121,7 @@ export default function Dashboard({ user, onOpenModal }) {
                               ref.idioma === 'ITALIANO' ? 'Italiano' : ref.idioma
                         }
                       </td>
-                      <td>{ref.fecha || '-'}</td>
+                      <td>{ref.fechaRegistro || '-'}</td>
                       <td>
                         <span className={`status-badge ${estatusClase}`}>
                           {estatusTexto}

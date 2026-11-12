@@ -10,6 +10,8 @@ import Modal from './components/Modal';
 import WhatsAppFloat from './components/WhatsAppFloat';
 import Toast from './components/Toast';
 import ReferidosEmbajador from './components/ReferidosEmbajador';
+import CheckEmail from './components/CheckEmail';
+import VerificarCuenta from './components/VerificarCuenta';
 
 export default function App() {
   const [user, setUser] = useState(null);
@@ -126,6 +128,9 @@ export default function App() {
             )
           }
         />}
+
+        <Route path="/check-email" element={<CheckEmail />} />
+        <Route path="/verificar" element={<VerificarCuenta />} />
       </Routes>
 
       <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
