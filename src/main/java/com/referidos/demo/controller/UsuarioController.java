@@ -2,7 +2,7 @@ package com.referidos.demo.controller;
 
 import com.referidos.demo.model.Usuarios;
 import com.referidos.demo.service.UsuarioService;
-
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,7 +19,7 @@ public class UsuarioController {
     private UsuarioService usuarioService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registrarEmbajador(@RequestBody Usuarios usuarios){
+    public ResponseEntity<?> registrarEmbajador(@Valid @RequestBody Usuarios usuarios){
         try {
             Usuarios nuevoUsuario = usuarioService.registrarEmbajador(usuarios);
             return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);

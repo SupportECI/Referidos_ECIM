@@ -1,6 +1,10 @@
 package com.referidos.demo.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 
 @Entity
 @Table (name = "usuarios")
@@ -9,18 +13,28 @@ public class Usuarios {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(min = 2, max = 50)
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$", message = "El nombre solo puede contener letras")
     @Column(nullable = false)
     private String nombre;
 
+    @NotBlank(message = "El apellido es obligatorio")
+    @Size(min = 2, max = 50)
+    @Pattern(regexp = "^[a-zA-ZáéíóúÁÉÍÓÚñÑ\\s]+$", message = "El apellido solo puede contener letras")
     @Column(nullable = false)
     private String apellidos;
 
     @Column(nullable = false)
     private String estado;
 
+    @NotBlank(message = "El correo es obligatorio")
+    @Email(message = "El formato del correo no es valido")
     @Column(nullable = false, unique = true)
     private String correo;
 
+    @NotBlank(message = "El celular es obligatorio")
+    @Pattern(regexp = "^\\d{10}$", message = "El celular debe tener 10 numeros")
     @Column(nullable = false)
     private String celular;
 
@@ -28,6 +42,8 @@ public class Usuarios {
     @Column(nullable = false)
     private RelacionEmpresa relacionEmpresa;
 
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
     @Column(nullable = false)
     private String password;
 
